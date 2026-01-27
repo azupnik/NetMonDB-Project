@@ -288,6 +288,21 @@ Poniżej przedstawiono dowody na działanie zaimplementowanej logiki biznesowej 
 ![Dowód Audytu](assets/test_audit.png)
 
 ---
+### Analiza i optymalizacja wydajności
+
+Analiza polecenia `EXPLAIN` przed optymalizacją wykazała typ złączenia `ALL`, co oznacza **pełne skanowanie tabeli** (*Full Table Scan*). Baza danych musiała przetworzyć aż **51 281 wierszy**, aby znaleźć szukane rekordy, co przy tej skali jest operacją wysoce niewydajną.
+
+Zastosowanie indeksu `idx_metrics_date` na kolumnie `measured_at` pozwoliło zredukować liczbę przeszukiwanych wierszy z ponad 50 tysięcy do zaledwie **jednego** (*Index Range Scan*). Ta operacja drastycznie zwiększyła wydajność zapytań raportowych filtrujących dane po dacie.
+
+#### 🔎 Porównanie wyników EXPLAIN
+
+**1. Przed optymalizacją (Full Table Scan):**
+Zwróć uwagę na kolumnę `type: ALL` oraz liczbę wierszy `rows: 51281`.
+![Wynik EXPLAIN przed optymalizacją](assets/image_before.png)
+
+**2. Po dodaniu indeksu (Index Range Scan):**
+Zwróć uwagę na zmianę `type` na `range`, użycie klucza `idx_metrics_date` oraz `rows: 1`.
+![Wynik EXPLAIN po optymalizacji](assets/image_after.png)
 
 ## Przykładowe Zapytania SQL
 
