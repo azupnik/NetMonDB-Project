@@ -287,17 +287,63 @@ Poniżej przedstawiono dowody na działanie zaimplementowanej logiki biznesowej 
 
 ![Dowód Audytu](assets/test_audit.png)
 
-## Technologie
-
-* **Silnik Bazy:** MySQL / MariaDB
-* **Klient:** phpMyAdmin / DBeaver
-* **Język:** SQL (DDL, DML, DQL)
-* **Narzędzia:** Lucidchart (ERD), GitHub (Wersjonowanie)
-
 ---
 
-## 📊 Przykładowe zapytania (Screenshots)
+## Przykładowe Zapytania SQL
 
-### Wykrycie awarii przez automat:
+Poniżej znajdują się gotowe zapytania do obsługi najczęstszych procesów w systemie.
+
+### 1. Lista aktywnych klientów i ich pakiety
+Pobiera listę klientów z aktywną usługą, nazwą planu oraz ceną.
+
 ```sql
-SELECT * FROM Incidents WHERE description LIKE '%AUTO-ALERT%';
+SELECT u.username, u.email, p.name AS plan, p.price_pln, c.address_city
+FROM Users u
+JOIN Contracts c ON u.user_id = c.user_id
+JOIN Plans p ON c.plan_id = p.plan_id
+WHERE c.status = 'active';
+```
+### 2. Wykrywanie awarii (Ping > 100ms)
+Zwraca listę urządzeń, które w ostatnich pomiarach zgłosiły wysokie opóźnienia.
+
+```sql
+SELECT d.mac_address, d.location_name, m.ping_ms, m.measured_at
+FROM Metrics m
+JOIN Devices d ON m.device_id = d.device_id
+WHERE m.ping_ms > 100
+ORDER BY m.measured_at DESC
+LIMIT 10;
+```
+### 3. Raport finansowy (Miesięczny przychód)
+Sumuje wartość wszystkich aktywnych umów, aby oszacować miesięczny przychód.
+
+```sql
+SELECT COUNT(c.contract_id) AS aktywne_umowy, SUM(p.price_pln) AS suma_przychodow
+FROM Contracts c
+JOIN Plans p ON c.plan_id = p.plan_id
+WHERE c.status = 'active';
+```
+### 4. Zaległe płatności (Windykacja)
+Generuje listę użytkowników z przeterminowanymi fakturami, sortując od największego opóźnienia.
+
+```sql
+SELECT u.username, i.invoice_id, i.amount_pln, DATEDIFF(CURRENT_DATE, i.due_date) AS dni_spoznienia
+FROM Invoices i
+JOIN Contracts c ON i.contract_id = c.contract_id
+JOIN Users u ON c.user_id = u.user_id
+WHERE i.payment_status = 'overdue'
+ORDER BY dni_spoznienia DESC;
+```
+### 5. Obłożenie techników pracą
+Pokazuje, ilu techników jest aktualnie przypisanych do otwartych zgłoszeń awarii.
+
+```sql
+SELECT t.full_name, COUNT(ia.assignment_id) AS aktywne_zadania
+FROM Technicians t
+LEFT JOIN IncidentAssignments ia ON t.tech_id = ia.tech_id
+LEFT JOIN Incidents i ON ia.incident_id = i.incident_id
+WHERE i.status IN ('open', 'in_progress')
+GROUP BY t.tech_id;
+```
+
+
