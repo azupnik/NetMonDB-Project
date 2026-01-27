@@ -211,7 +211,7 @@ Przygotowano widoki dla analityków biznesowych:
 Ze względu na ograniczenia uprawnień na serwerze uczelnianym (brak dostępu do `CREATE PROCEDURE`), logika masowych zmian (np. waloryzacja cen o inflację) została zaimplementowana za pomocą **skryptów transakcyjnych** (`START TRANSACTION ... COMMIT`), gwarantujących spójność danych.
 
 ---
-## 📊 Widoki (Views)
+## Widoki (Views)
 
 W projekcie zaimplementowano mechanizm **Widoków (Virtual Tables)**, który tworzy warstwę abstrakcji nad skomplikowanymi zapytaniami SQL. Zastosowanie widoków pozwoliło na ukrycie złożoności złączeń (JOIN) wielu tabel oraz odseparowanie surowych danych od warstwy raportowej.
 
@@ -287,6 +287,19 @@ Poniżej przedstawiono dowody na działanie zaimplementowanej logiki biznesowej 
 
 ![Dowód Audytu](assets/test_audit.png)
 
+### Scenariusz 3: Ochrona spójności danych (Data Integrity)
+**Cel:** Weryfikacja, czy system skutecznie blokuje próby usunięcia użytkowników posiadających aktywne usługi (referential integrity).
+
+1.  **Akcja:** Próba wykonania polecenia usuwającego użytkownika, który jest wciąż powiązany z aktywnymi umowami:
+    ```sql
+    DELETE FROM Users WHERE email = 'test_delete@netmon.pl';
+    ```
+2.  **Wynik:** Trigger `Prevent_Active_User_Delete` (lub analogiczny) zadziałał prawidłowo, przerywając transakcję.
+    * Baza danych nie pozwoliła na usunięcie rekordu.
+    * Zwrócono niestandardowy komunikat błędu `#1644`: **"TEST ZALICZONY: Blokada usunięcia aktywnego klienta!"**.
+
+![Dowód Blokady Usunięcia](assets/image_trigger.png)
+
 ---
 ### Analiza i optymalizacja wydajności
 
@@ -294,7 +307,7 @@ Analiza polecenia `EXPLAIN` przed optymalizacją wykazała typ złączenia `ALL`
 
 Zastosowanie indeksu `idx_metrics_date` na kolumnie `measured_at` pozwoliło zredukować liczbę przeszukiwanych wierszy z ponad 50 tysięcy do zaledwie **jednego** (*Index Range Scan*). Ta operacja drastycznie zwiększyła wydajność zapytań raportowych filtrujących dane po dacie.
 
-#### 🔎 Porównanie wyników EXPLAIN
+#### Porównanie wyników EXPLAIN
 
 **1. Przed optymalizacją (Full Table Scan):**
 Zwróć uwagę na kolumnę `type: ALL` oraz liczbę wierszy `rows: 51281`.
