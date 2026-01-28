@@ -9,7 +9,7 @@ Autorzy: Rozalia Mitkowska, Joanna Żupnik
 
 1.  Pobierz repozytorium:
     ```bash
-    git clone [https://github.com/azupnik/NetMonDB-Project.git](https://github.com/azupnik/NetMonDB-Project.git)
+    git clone https://github.com/azupnik/NetMonDB-Project.git
     ```
 2.  Zaloguj się do **phpMyAdmin**.
 3.  Stwórz nową bazę danych (lub wybierz istniejącą).
