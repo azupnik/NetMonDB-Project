@@ -41,7 +41,7 @@ Baza danych składa się z **11 powiązanych tabel** spełniających wymogi 3NF.
 | 3 | **`Users`** | Dane logowania, role (admin/klient) oraz dane kontaktowe użytkowników systemu. |
 | 4 | **`Contracts`** | Aktywne i archiwalne umowy łączące konkretnego Użytkownika z wybranym Planem. |
 | 5 | **`Devices`** | Sprzęt monitorujący (routery/sondy) zainstalowany u klienta. Powiązany z kontem usera. |
-| 6 | **`Metrics`** | **Największa tabela.** Przechowuje wyniki pomiarów (ping, prędkość) wysyłane przez urządzenia. |
+| 6 | **`Metrics`** | Przechowuje wyniki pomiarów (ping, prędkość) wysyłane przez urządzenia. |
 | 7 | **`Incidents`** | Rejestr awarii – zarówno zgłaszanych ręcznie, jak i wykrytych automatycznie przez trigger. |
 | 8 | **`Technicians`** | Lista pracowników technicznych dostępnych do usuwania awarii. |
 | 9 | **`IncidentAssignments`** | Tabela realizująca relację *Wiele-do-Wielu*: przypisuje techników do konkretnych awarii. |
