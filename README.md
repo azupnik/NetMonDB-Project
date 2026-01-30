@@ -190,7 +190,7 @@ Dziennik zmian systemowych rejestrowany przez triggery (bez relacji FK).
 
 ## Kluczowe Funkcjonalności (Logika Biznesowa)
 
-Projekt wykorzystuje zaawansowane mechanizmy silnika MySQL do automatyzacji procesów.
+Projekt wykorzystuje zaawansowane mechanizmy do automatyzacji procesów.
 
 ### 1. Automatyczne wykrywanie awarii (Triggers)
 System monitoruje napływające dane w czasie rzeczywistym.
