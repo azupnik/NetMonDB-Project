@@ -207,9 +207,6 @@ Przygotowano widoki dla analityków biznesowych:
 - **`View_Provider_Stats`** – Ranking dostawców (średni ping, liczba awarii, ilość klientów).
 - **`View_Overdue_Payments`** – Lista dłużników dla działu księgowości.
 
-### 4. Zarządzanie Transakcyjne
-Ze względu na ograniczenia uprawnień na serwerze uczelnianym (brak dostępu do `CREATE PROCEDURE`), logika masowych zmian (np. waloryzacja cen o inflację) została zaimplementowana za pomocą **skryptów transakcyjnych** (`START TRANSACTION ... COMMIT`), gwarantujących spójność danych.
-
 ---
 ## Widoki (Views)
 
@@ -267,9 +264,7 @@ Poniżej przedstawiono dowody na działanie zaimplementowanej logiki biznesowej 
 1.  **Akcja:** Symulacja "złego" pomiaru przez wstawienie rekordu z pingiem **2500ms**:
     ```sql
     -- 1. Symulacja awarii
-    INSERT INTO Metrics (device_id, ping_ms, jitter_ms, packet_loss_percent, download_speed_mbps, upload_speed_mbps) 
-VALUES (1, 3000, 100, 20.0, 2.0, 0.5);
-
+    INSERT INTO Metrics (device_id, ping_ms, jitter_ms, packet_loss_percent, download_speed_mbps, upload_speed_mbps) VALUES (2, 3000, 100, 20.0, 2.0, 0.5)
 -- 2. Sprawdzenie wyniku
 SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
     ```
@@ -284,7 +279,7 @@ SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
 
 1.  **Akcja:** Ręczna zmiana statusu umowy klienta na wypowiedzianą (`terminated`) oraz wykonanie skryptu podwyżki cen:
     ```sql
-    UPDATE Contracts SET status = 'terminated' WHERE contract_id = 1;
+    UPDATE Contracts SET status = 'terminated' WHERE contract_id = 2;
     ```
 2.  **Wynik:** Tabela `AuditLogs` zarejestrowała obie operacje.
     * Widać wpis o **"Masowej podwyżce cen"**.
