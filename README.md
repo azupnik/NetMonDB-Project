@@ -32,6 +32,42 @@ Baza danych składa się z **11 powiązanych tabel** spełniających wymogi 3NF.
 
 ![Diagram ERD](assets/SchematERD.png)
 
+### Diagram Sekwencji: Automatyczne wykrywanie awarii
+  ```mermaid
+sequenceDiagram
+    participant D as Urządzenie (Device)
+    participant M as Tabela Metrics
+    participant T as TRIGGER: Auto_Detect_Incident
+    participant I as Tabela Incidents
+
+    D->>M: INSERT (nowy pomiar ping/jitter)
+    Note over M,T: Po wstawieniu rekordu
+    T->>T: Sprawdzenie warunku: czy ping > 1000ms?
+    
+    alt Ping powyżej normy
+        T->>I: INSERT (nowy rekord awarii)
+        Note right of I: Status: 'CRITICAL', Opis: 'AUTO-ALERT'
+    else Ping w normie
+        Note over T: Brak akcji
+    end
+ ```
+### Diagram Stanów: Cykl życia zgłoszenia (Incident)
+  ```mermaid
+stateDiagram-v2
+    [*] --> Open: Wykrycie awarii <br/>(Trigger/Manual)
+    
+    Open --> InProgress: Przypisanie technika <br/>(IncidentAssignments)
+    note right of Open : Status ustawiany na 'Open'
+    
+    InProgress --> Resolved: Naprawa usterki
+    note right of InProgress : Technik pracuje nad<br/> rozwiązaniem
+    
+    Resolved --> [*]: Zamknięcie zgłoszenia
+    
+    InProgress --> Open: Rezygnacja technika /<br/> Brak części
+    Resolved --> InProgress: Ponowne wystąpienie<br/> problemu
+ ```
+
 ### Lista Tabel w Bazie Danych
 
 | Lp. | Nazwa Tabeli | Opis przechowywanych danych |
