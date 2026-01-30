@@ -233,6 +233,8 @@ Jest to główny widok analityczny systemu, służący do monitorowania SLA. Agr
 | **UPC / Play** | 89 | 550.2 | **45.1** | **3** |
 | **Netia S.A.** | 42 | 890.0 | 9.8 | 1 |
 
+![View_Provider_Stats](assets/View_provider_stats.png)
+
 ---
 
 ### 2. `View_Overdue_Payments` (Raport Finansowy)
@@ -253,6 +255,8 @@ Widok dedykowany dla procesów księgowych i windykacyjnych. Dynamicznie filtruj
 |:---|:---|:---:|:---:|:---|:---:|
 | `nowak_anna` | anna.nowak@onet.pl | 15 | 65.00 | 2023-10-19 | **14** |
 | `firma_x` | biuro@firma-x.pl | 22 | 120.00 | 2023-10-01 | **32** |
+
+![View_Overdue_Payments](assets/view_overdue_payments.png)
 
 ## Scenariusze Testowe (Dowód Działania)
 
