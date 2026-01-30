@@ -14,7 +14,7 @@ Autorzy: Rozalia Mitkowska, Joanna Żupnik
 2.  Zaloguj się do **phpMyAdmin**.
 3.  Stwórz nową bazę danych (lub wybierz istniejącą).
 4.  Zaimportuj plik `NetMonDB.sql`.
-5.  Gotowe! Tabele, widoki i triggery są aktywne.
+5.  Tabele, widoki i triggery są aktywne.
 
 ---
 ## Opis Projektu
