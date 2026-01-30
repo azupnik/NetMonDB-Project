@@ -210,7 +210,7 @@ Przygotowano widoki dla analityków biznesowych:
 ---
 ## Widoki (Views)
 
-W projekcie zaimplementowano mechanizm **Widoków (Virtual Tables)**, który tworzy warstwę abstrakcji nad skomplikowanymi zapytaniami SQL. Zastosowanie widoków pozwoliło na ukrycie złożoności złączeń (JOIN) wielu tabel oraz odseparowanie surowych danych od warstwy raportowej.
+W projekcie zaimplementowano mechanizm **Widoków**. Zastosowanie widoków pozwoliło na ukrycie złożoności złączeń (JOIN) wielu tabel oraz odseparowanie surowych danych od warstwy raportowej.
 
 W systemie zdefiniowano dwa kluczowe widoki analityczne:
 
