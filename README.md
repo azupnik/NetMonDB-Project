@@ -32,25 +32,6 @@ Baza danych składa się z **11 powiązanych tabel** spełniających wymogi 3NF.
 
 ![Diagram ERD](assets/SchematERD.png)
 
-### Diagram Sekwencji: Automatyczne wykrywanie awarii
-  ```mermaid
-sequenceDiagram
-    participant D as Urządzenie (Device)
-    participant M as Tabela Metrics
-    participant T as TRIGGER: Auto_Detect_Incident
-    participant I as Tabela Incidents
-
-    D->>M: INSERT (nowy pomiar ping/jitter)
-    Note over M,T: Po wstawieniu rekordu
-    T->>T: Sprawdzenie warunku: czy ping > 1000ms?
-    
-    alt Ping powyżej normy
-        T->>I: INSERT (nowy rekord awarii)
-        Note right of I: Status: 'CRITICAL', Opis: 'AUTO-ALERT'
-    else Ping w normie
-        Note over T: Brak akcji
-    end
- ```
 
 ### Lista Tabel w Bazie Danych
 
@@ -216,6 +197,25 @@ Projekt wykorzystuje zaawansowane mechanizmy do automatyzacji procesów.
 System monitoruje napływające dane w czasie rzeczywistym.
 - **Trigger:** `Auto_Detect_Incident`
 - **Działanie:** Jeśli `ping_ms > 1000` lub utrata pakietów przekracza normę, system **automatycznie tworzy rekord w tabeli `Incidents`** ze statusem `CRITICAL` i opisem `AUTO-ALERT`.
+### Diagram Sekwencji: Automatyczne wykrywanie awarii
+  ```mermaid
+sequenceDiagram
+    participant D as Urządzenie (Device)
+    participant M as Tabela Metrics
+    participant T as TRIGGER: Auto_Detect_Incident
+    participant I as Tabela Incidents
+
+    D->>M: INSERT (nowy pomiar ping/jitter)
+    Note over M,T: Po wstawieniu rekordu
+    T->>T: Sprawdzenie warunku: czy ping > 1000ms?
+    
+    alt Ping powyżej normy
+        T->>I: INSERT (nowy rekord awarii)
+        Note right of I: Status: 'CRITICAL', Opis: 'AUTO-ALERT'
+    else Ping w normie
+        Note over T: Brak akcji
+    end
+ ```
 
 ### 2. Audyt bezpieczeństwa
 Każda kluczowa zmiana jest rejestrowana.
