@@ -266,7 +266,12 @@ Poniżej przedstawiono dowody na działanie zaimplementowanej logiki biznesowej 
 
 1.  **Akcja:** Symulacja "złego" pomiaru przez wstawienie rekordu z pingiem **2500ms**:
     ```sql
-    INSERT INTO Metrics (device_id, ping_ms, ...) VALUES (1, 2500, ...);
+    -- 1. Symulacja awarii
+    INSERT INTO Metrics (device_id, ping_ms, jitter_ms, packet_loss_percent, download_speed_mbps, upload_speed_mbps) 
+VALUES (1, 3000, 100, 20.0, 2.0, 0.5);
+
+-- 2. Sprawdzenie wyniku
+SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
     ```
 2.  **Wynik:** Trigger `Auto_Detect_Incident` uruchomił się automatycznie. W tabeli `Incidents` pojawił się nowy wiersz ze statusem `CRITICAL` i opisem **"AUTO-ALERT: Krytyczny ping na urządzeniu ID: 1"**.
 
