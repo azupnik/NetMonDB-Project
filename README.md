@@ -51,22 +51,6 @@ sequenceDiagram
         Note over T: Brak akcji
     end
  ```
-### Diagram Stanów: Cykl życia zgłoszenia (Incident)
-  ```mermaid
-stateDiagram-v2
-    [*] --> Open: Wykrycie awarii <br/>(Trigger/Manual)
-    
-    Open --> InProgress: Przypisanie technika <br/>(IncidentAssignments)
-    note right of Open : Status ustawiany na 'Open'
-    
-    InProgress --> Resolved: Naprawa usterki
-    note right of InProgress : Technik pracuje nad<br/> rozwiązaniem
-    
-    Resolved --> [*]: Zamknięcie zgłoszenia
-    
-    InProgress --> Open: Rezygnacja technika /<br/> Brak części
-    Resolved --> InProgress: Ponowne wystąpienie<br/> problemu
- ```
 
 ### Lista Tabel w Bazie Danych
 
