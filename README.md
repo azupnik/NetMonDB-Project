@@ -30,7 +30,7 @@ System rozwiązuje problem rozproszenia danych, integrując w jednym miejscu inf
 
 Baza danych składa się z **11 powiązanych tabel** spełniających wymogi 3NF.
 
-![Diagram ERD](assets/SchematERD.png)
+![Diagram ERD](assets/Schematy/SchematERD.png)
 
 
 ### Lista Tabel w Bazie Danych
@@ -253,7 +253,7 @@ Jest to główny widok analityczny systemu, służący do monitorowania SLA. Agr
 | **UPC / Play** | 89 | 550.2 | **45.1** | **3** |
 | **Netia S.A.** | 42 | 890.0 | 9.8 | 1 |
 
-![View_Provider_Stats](assets/View_provider_stats.png)
+![View_Provider_Stats](assets/Widoki/View_provider_stats.png)
 
 ---
 
@@ -276,7 +276,7 @@ Widok dedykowany dla procesów księgowych i windykacyjnych. Dynamicznie filtruj
 | `nowak_anna` | anna.nowak@onet.pl | 15 | 65.00 | 2023-10-19 | **14** |
 | `firma_x` | biuro@firma-x.pl | 22 | 120.00 | 2023-10-01 | **32** |
 
-![View_Overdue_Payments](assets/view_overdue_payments.png)
+![View_Overdue_Payments](assets/Widoki/view_overdue_payments.png)
 
 ## Scenariusze Testowe (Dowód Działania)
 
@@ -295,7 +295,7 @@ SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
 ```
 3.  **Wynik:** Trigger `Auto_Detect_Incident` uruchomił się automatycznie. W tabeli `Incidents` pojawił się nowy wiersz ze statusem `CRITICAL` i opisem **"AUTO-ALERT: Krytyczny ping na urządzeniu ID: 1"**.
 
-![Dowód Triggera Awarii](assets/test_incidents.png)
+![Dowód Triggera Awarii](assets/Triggery/test_incidents.png)
 
 ---
 
@@ -310,7 +310,7 @@ SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
     * Widać wpis o **"Masowej podwyżce cen"**.
     * Widać wpis o zmianie w tabeli `Contracts` (Operacja `UPDATE`, zmiana statusu z `active` na `terminated`).
 
-![Dowód Audytu](assets/test_audit.png)
+![Dowód Audytu](assets/Triggery/test_audit.png)
 
 ### Scenariusz 3: Ochrona spójności danych (Data Integrity)
 **Cel:** Weryfikacja, czy system skutecznie blokuje próby usunięcia użytkowników posiadających aktywne usługi (referential integrity).
@@ -323,7 +323,7 @@ SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
     * Baza danych nie pozwoliła na usunięcie rekordu.
     * Zwrócono niestandardowy komunikat błędu `#1644`: **"TEST ZALICZONY: Blokada usunięcia aktywnego klienta!"**.
 
-![Dowód Blokady Usunięcia](assets/image_trigger.png)
+![Dowód Blokady Usunięcia](assets/Triggery/image_trigger.png)
 
 ---
 ### Analiza i optymalizacja wydajności
@@ -336,11 +336,11 @@ Zastosowanie indeksu `idx_metrics_date` na kolumnie `measured_at` pozwoliło zre
 
 **1. Przed optymalizacją (Full Table Scan):**
 Zwróć uwagę na kolumnę `type: ALL` oraz liczbę wierszy `rows: 51281`.
-![Wynik EXPLAIN przed optymalizacją](assets/image_before.png)
+![Wynik EXPLAIN przed optymalizacją](assets/Analiza/image_before.png)
 
 **2. Po dodaniu indeksu (Index Range Scan):**
 Zwróć uwagę na zmianę `type` na `range`, użycie klucza `idx_metrics_date` oraz `rows: 1`.
-![Wynik EXPLAIN po optymalizacji](assets/image_after.png)
+![Wynik EXPLAIN po optymalizacji](assets/Analiza/image_after.png)
 
 ## Przykładowe Zapytania SQL
 
