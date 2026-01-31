@@ -228,6 +228,63 @@ Przygotowano widoki dla analityków biznesowych:
 - **`View_Overdue_Payments`** – Lista dłużników dla działu księgowości.
 
 ---
+## Triggery
+
+W systemie NetMonDB zaimplementowano zaawansowaną logikę biznesową bezpośrednio po stronie bazy danych. Wykorzystanie wyzwalaczy (triggers) zapewnia integralność danych, automatyzuje powtarzalne procesy oraz chroni system przed błędami ludzkimi, niezależnie od działania aplikacji klienckiej.
+
+### Zestawienie zaimplementowanych wyzwalaczy
+
+| Nazwa Triggera | Tabela | Zdarzenie | Opis Funkcjonalności |
+| :--- | :--- | :--- | :--- |
+| **`Auto_Detect_Incident`** | `Metrics` | `AFTER INSERT` | **Monitoring.** Automatycznie wykrywa awarię (ping > 1000ms) i tworzy zgłoszenie w tabeli `Incidents`. |
+| **`Audit_Contract_Update`** | `Contracts` | `AFTER UPDATE` | **Audyt.** Rejestruje każdą zmianę w umowie (zmiana statusu, daty) w tabeli `AuditLogs`. |
+| **`Validate_Contract_Dates`** | `Contracts` | `BEFORE INSERT` | **Walidacja.** Blokuje dodanie umowy, której data zakończenia jest wcześniejsza niż data rozpoczęcia. |
+| **`Check_Tech_Availability`** | `IncidentAssignments` | `BEFORE INSERT` | **Zarządzanie zasobami.** Uniemożliwia przypisanie awarii technikowi, który ma status "Niedostępny". |
+| **`Auto_Close_Incident`** | `Incidents` | `BEFORE UPDATE` | **Automatyzacja.** Przy zmianie statusu na `resolved`, system automatycznie uzupełnia datę zakończenia naprawy. |
+| **`Prevent_User_Delete`** | `Users` | `BEFORE DELETE` | **Walidacja.** Ochrona przed utratą danych. Blokuje usunięcie użytkownika z bazy, jeśli posiada on przynajmniej jedną umowę o statusie active. |
+
+---
+
+### Automatyzacja i Monitoring
+
+#### 1. `Auto_Detect_Incident`
+* **Tabela:** `Metrics` | **Zdarzenie:** `AFTER INSERT`
+* **Opis:** Realizuje funkcję "Active Database". Po dodaniu każdego pomiaru system sprawdza opóźnienie (`ping_ms`). Jeśli przekroczy ono progi krytyczne (>1000ms), system autonomicznie generuje rekord w tabeli `Incidents`.
+* **Kluczowa funkcja:** Automatyczna detekcja awarii w czasie rzeczywistym bez udziału człowieka.
+
+#### 2. `Auto_Close_Incident`
+* **Tabela:** `Incidents` | **Zdarzenie:** `BEFORE UPDATE`
+* **Opis:** Wsparcie dla personelu technicznego. W momencie zmiany statusu zgłoszenia na `resolved`, trigger automatycznie wstawia aktualny znacznik czasu do kolumny `end_time`.
+* **Kluczowa funkcja:** Precyzyjne raportowanie czasu naprawy (SLA) i eliminacja błędów manualnych.
+
+---
+
+### Bezpieczeństwo i Audyt
+
+#### 3. `Prevent_User_Delete`
+* **Tabela:** `Users` | **Zdarzenie:** `BEFORE DELETE`
+* **Opis:** Mechanizm ochrony procesów biznesowych. Blokuje usunięcie użytkownika, jeśli posiada on aktywną umowę (`status = 'active'`). 
+* **Kluczowa funkcja:** Zapobieganie utracie danych o klientach, którym wciąż świadczone są usługi.
+
+#### 4. `Audit_Contract_Update`
+* **Tabela:** `Contracts` | **Zdarzenie:** `AFTER UPDATE`
+* **Opis:** Funkcja "Black Box". Każda zmiana statusu lub parametrów umowy jest rejestrowana w tabeli `AuditLogs` wraz z informacją o operatorze (użytkownik bazy danych) i starych wartościach.
+* **Kluczowa funkcja:** Pełna rozliczalność (accountability) zmian w systemie.
+
+---
+
+### Walidacja i Logika Biznesowa
+
+#### 5. `Validate_Contract_Dates`
+* **Tabela:** `Contracts` | **Zdarzenie:** `BEFORE INSERT`
+* **Opis:** Strażnik chronologii. Porównuje datę rozpoczęcia i zakończenia umowy przed jej zapisem w bazie.
+* **Kluczowa funkcja:** Blokowanie błędów logicznych (np. data zakończenia wcześniejsza niż rozpoczęcia) na poziomie silnika SQL.
+
+#### 6. `Check_Tech_Availability`
+* **Tabela:** `IncidentAssignments` | **Zdarzenie:** `BEFORE INSERT`
+* **Opis:** Optymalizacja zasobów ludzkich. Przed przypisaniem technika do awarii, trigger sprawdza jego flagę dostępności (`is_available`).
+* **Kluczowa funkcja:** Uniemożliwienie przypisywania zadań pracownikom, którzy są na urlopie lub chorobowym.   
+---
 ## Widoki (Views)
 
 W projekcie zaimplementowano mechanizm **Widoków**. Zastosowanie widoków pozwoliło na ukrycie złożoności złączeń (JOIN) wielu tabel oraz odseparowanie surowych danych od warstwy raportowej.
@@ -280,7 +337,7 @@ Widok dedykowany dla procesów księgowych i windykacyjnych. Dynamicznie filtruj
 
 ## Scenariusze Testowe (Dowód Działania)
 
-Poniżej przedstawiono dowody na działanie zaimplementowanej logiki biznesowej (Triggerów) w środowisku phpMyAdmin.
+Poniżej przedstawiono dowody na działanie zaimplementowanej logiki biznesowej w środowisku phpMyAdmin.
 
 ### Scenariusz 1: Automatyczne wykrywanie awarii (Active Database)
 **Cel:** Weryfikacja, czy system samoczynnie reaguje na krytyczne parametry sieci.
@@ -297,7 +354,6 @@ SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
 
 ![Dowód Triggera Awarii](assets/Triggery/test_incidents.png)
 
----
 
 ### Scenariusz 2: Audyt bezpieczeństwa i zmian
 **Cel:** Weryfikacja, czy kluczowe zmiany w danych są rejestrowane (kto, co i kiedy zmienił).
@@ -319,7 +375,7 @@ SELECT * FROM Incidents ORDER BY incident_id DESC LIMIT 1;
     ```sql
     DELETE FROM Users WHERE email = 'test_delete@netmon.pl';
     ```
-2.  **Wynik:** Trigger `Prevent_Active_User_Delete` (lub analogiczny) zadziałał prawidłowo, przerywając transakcję.
+2.  **Wynik:** Trigger `Prevent_Active_User_Delete` zadziałał prawidłowo, przerywając transakcję.
     * Baza danych nie pozwoliła na usunięcie rekordu.
     * Zwrócono niestandardowy komunikat błędu `#1644`: **"TEST ZALICZONY: Blokada usunięcia aktywnego klienta!"**.
 
