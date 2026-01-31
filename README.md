@@ -342,6 +342,29 @@ Zwróć uwagę na kolumnę `type: ALL` oraz liczbę wierszy `rows: 51281`.
 Zwróć uwagę na zmianę `type` na `range`, użycie klucza `idx_metrics_date` oraz `rows: 1`.
 ![Wynik EXPLAIN po optymalizacji](assets/Analiza/image_after.png)
 
+## 🔐 Zarządzanie Uprawnieniami i Bezpieczeństwo (RBAC)
+
+W projekcie wdrożono model kontroli dostępu oparty na rolach (**Role-Based Access Control**). Ze względu na ograniczenia infrastrukturalne serwera współdzielonego (brak uprawnień `SUPER/GRANT`), rozwiązanie podzielono na dwie warstwy:
+
+### 1. Warstwa Aplikacyjna (Zaimplementowana)
+Faktyczna kontrola dostępu realizowana jest logicznie w tabeli `Users` poprzez kolumnę `role` (typ `ENUM`). Zdefiniowano trzy poziomy uprawnień:
+* **ADMIN:** Pełny dostęp do konfiguracji systemu, edycji ofert (`Plans`) oraz zarządzania krytycznymi incydentami.
+* **CLIENT:** Dostęp ograniczony do odczytu oferty (`SELECT`) oraz wglądu we własne umowy i faktury.
+* **AUDITOR:** Rola specjalna z dostępem wyłącznie do tabeli `AuditLogs` oraz widoków analitycznych (np. `View_Provider_Stats`), służąca do kontroli rozliczalności systemu.
+
+### 2. Warstwa Bazodanowa (Projekt Wdrożeniowy)
+W dokumentacji projektowej zawarto kompletny skrypt SQL (`security_roles.sql`) przygotowany do wdrożenia na dedykowanym serwerze produkcyjnym. Realizuje on zasadę **Least Privilege** (najmniejszych przywilejów) na poziomie silnika bazy danych.  
+```sql
+-- Fragment planowanego wdrożenia produkcyjnego:
+CREATE ROLE 'role_auditor';
+GRANT SELECT ON NetMonDB.AuditLogs TO 'role_auditor';
+GRANT SELECT ON NetMonDB.View_Provider_Stats TO 'role_auditor';
+-- Rola audytora nie posiada uprawnień INSERT/DELETE ani dostępu do danych osobowych.
+```
+### 3. Bezpieczeństwo Danych
+* **Hasła:** Przechowywane jako skróty (symulacja hash), a nie jawny tekst.
+* **Transakcyjność:** Kluczowe operacje (np. usuwanie użytkowników) są zabezpieczone wyzwalaczami ('Prevent_User_Delete') chroniącymi przed naruszeniem integralności referencyjnej.
+
 ## Przykładowe Zapytania SQL
 
 Poniżej znajdują się gotowe zapytania do obsługi najczęstszych procesów w systemie.
